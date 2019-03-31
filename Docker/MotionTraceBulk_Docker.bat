@@ -2,9 +2,10 @@
 rem --- 
 rem ---  映像データから各種トレースデータを揃えてvmdを生成する
 rem --- 
+cls
 
-# docker image tag
-set IMAGE_TAG=1.00-1
+rem docker image tag
+set IMAGE_TAG=1.01-1
 
 rem -- Openpose 実行
 call BulkOpenpose_Docker.bat
@@ -40,7 +41,7 @@ for /L %%i in (1,1,%NUMBER_PEOPLE_MAX%) do (
     call Bulk3dPoseBaseline_Docker.bat
     
     rem -- 3dpose_gan実行
-    call Bulk3dPoseGan_Docker.bat
+    rem call Bulk3dPoseGan_Docker.bat
 
     rem -- VMD-3d-pose-baseline-multi 実行
     call BulkVmd_Docker.bat
