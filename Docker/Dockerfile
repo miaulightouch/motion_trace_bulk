@@ -94,19 +94,6 @@ RUN mkdir /3d-pose-baseline-vmd/experiments \
  && unzip -d /3d-pose-baseline-vmd/ experiments.zip \
  && rm experiments.zip
 
-# 3dpose-gan
-RUN apt-get install -y python3-scipy
-RUN pip3 install chainer
-RUN curl -L https://github.com/miu200521358/3dpose_gan_vmd/archive/master.tar.gz \
- | tar -zxv \
- && mv 3dpose_gan_vmd-master 3dpose_gan_vmd
-RUN curl --create-dirs -o /3dpose_gan_vmd/openpose/openpose_pose_coco.prototxt \
- -L https://raw.githubusercontent.com/opencv/opencv_extra/3.4.1/testdata/dnn/openpose_pose_coco.prototxt
-RUN curl --create-dirs -o /3dpose_gan_vmd/openpose/pose_iter_440000.caffemodel \
- -L http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/coco/pose_iter_440000.caffemodel
-RUN curl --create-dirs -o /3dpose_gan_vmd/train/gen_epoch_500.npz \
- -L https://github.com/DwangoMediaVillage/3dpose_gan/blob/master/sample/gen_epoch_500.npz?raw=true
-
 # VMD-3d-pose-baseline-multi
 RUN pip3 install PyQt5
 RUN curl -L https://github.com/miu200521358/VMD-3d-pose-baseline-multi/archive/master.tar.gz \
