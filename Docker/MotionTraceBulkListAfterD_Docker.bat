@@ -8,7 +8,7 @@ cls
 rem docker image tag
 set IMAGE_TAG=1.02-1
 
-rem ---  入力対象映像ファイルパス
+rem ---  入力対象パラメーターファイルパス
 echo 解析対象となるパラメーター設定リストファイルのフルパスを入力して下さい。
 echo この設定は半角英数字のみ設定可能で、必須項目です。
 set TARGET_LIST=
@@ -22,15 +22,17 @@ IF /I "%TARGET_LIST%" EQU "" (
 
 SETLOCAL enabledelayedexpansion
 rem -- ファイル内をループして全件処理する
-for /f "tokens=1-7 skip=1" %%m in (%TARGET_LIST%) do (
+for /f "tokens=1-9 skip=1" %%m in (%TARGET_LIST%) do (
     echo ------------------------------
     echo 入力対象映像ファイルパス: %%m
     echo 解析を開始するフレーム: %%n
     echo 映像に映っている最大人数: %%o
     echo 詳細ログ[yes/no/warn]: %%p
     echo 解析を終了するフレーム: %%q
-    echo 反転指定リスト%%r
-    echo 順番指定リスト: %%s
+    echo Openpose解析結果JSONディレクトリパス: %%r
+    echo 深度推定結果ディレクトリパス: %%s
+    echo 反転指定リスト%%t
+    echo 順番指定リスト: %%u
     
     rem --- パラメーター保持
     set INPUT_VIDEO=%%m
@@ -39,9 +41,11 @@ for /f "tokens=1-7 skip=1" %%m in (%TARGET_LIST%) do (
     set VERBOSE=2
     set IS_DEBUG=%%p
     set FRAME_END=%%q
-    set REVERSE_SPECIFIC_LIST=%%r
-    set ORDER_SPECIFIC_LIST=%%s
-        
+    set OUTPUT_JSON_DIR=%%r
+    set PAST_DEPTH_PATH=%%s
+    set REVERSE_SPECIFIC_LIST=%%t
+    set ORDER_SPECIFIC_LIST=%%u
+    
     IF /I "!IS_DEBUG!" EQU "yes" (
         set VERBOSE=3
     )
@@ -60,12 +64,7 @@ for /f "tokens=1-7 skip=1" %%m in (%TARGET_LIST%) do (
     set DTTM=!DT:~0,4!!DT:~5,2!!DT:~8,2!_!TM2:~0,2!!TM2:~3,2!!TM2:~6,2!
     
     echo now: !DTTM!
-
-    rem -- Openpose 実行(質問なし)
-    call BulkOpenposeSilent_Docker.bat
-
-    echo BULK OUTPUT_JSON_DIR: !OUTPUT_JSON_DIR!
-
+    echo verbose: !VERBOSE!
 
     rem -----------------------------------
     rem --- JSON出力ディレクトリ から index別サブディレクトリ生成
@@ -73,12 +72,21 @@ for /f "tokens=1-7 skip=1" %%m in (%TARGET_LIST%) do (
         set OUTPUT_JSON_DIR_PARENT=%%~dpi
         set OUTPUT_JSON_DIR_NAME=%%~ni
     )
-
+    
+    rem --- コンテナ用のパラメーター
+    FOR %%1 IN (!INPUT_VIDEO!) DO (
+        rem -- 入力映像パスの親ディレクトリと、ファイル名+_jsonでパス生成
+        set INPUT_VIDEO_DIR=%%~dp1
+        set INPUT_VIDEO_FILENAME=%%~n1
+        set INPUT_VIDEO_FILENAME_EXT=%%~nx1
+    )
+    set C_INPUT_VIDEO=/data/!INPUT_VIDEO_FILENAME_EXT!
     set PARENT_DIR_FULL=!OUTPUT_JSON_DIR_PARENT:~0,-1!
     FOR %%i IN (!PARENT_DIR_FULL!) DO (
         set PARENT_DIR_NAME=%%~ni
     )
-    
+    set C_JSON_DIR=/data/!PARENT_DIR_NAME!/!OUTPUT_JSON_DIR_NAME!
+
     rem -- FCRN-DepthPrediction-vmd実行
     call BulkDepth_Docker.bat
 
@@ -101,7 +109,6 @@ for /f "tokens=1-7 skip=1" %%m in (%TARGET_LIST%) do (
     echo json: !OUTPUT_JSON_DIR!
     echo vmd:  !OUTPUT_SUB_DIR!
     echo ------------------------------------------
-
 
 
 )

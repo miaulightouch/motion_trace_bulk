@@ -5,7 +5,7 @@ rem ---
 cls
 
 rem docker image tag
-set IMAGE_TAG=1.01-1
+set IMAGE_TAG=1.02-1
 
 rem -- Openpose 実行
 call BulkOpenpose_Docker.bat
@@ -20,7 +20,11 @@ FOR %%1 IN (%OUTPUT_JSON_DIR%) DO (
     set OUTPUT_JSON_DIR_NAME=%%~n1
 )
 
-set DTTM_OLD=%DTTM%
+set PARENT_DIR_FULL=%OUTPUT_JSON_DIR_PARENT:~0,-1%
+FOR %%i IN (%PARENT_DIR_FULL%) DO (
+    set PARENT_DIR_NAME=%%~ni
+)
+
 rem -- 実行日付
 set DT=%date%
 rem -- 実行時間
